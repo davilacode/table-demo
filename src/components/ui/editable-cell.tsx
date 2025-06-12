@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { CellColor } from '@/types/projection';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface EditableCellProps {
   value: number;
@@ -14,10 +14,17 @@ const EditableCell: React.FC<EditableCellProps> = ({
   value,
   color,
   onEdit,
-  isEdited
+  isEdited,
+  ...props
 }) => {
+  
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value.toString());
+
+  // Sincroniza tempValue con value externo
+  useEffect(() => {
+    setTempValue(value.toString());
+  }, [value]);
   
   const colorClasses: Record<CellColor, string> = {
     red: 'bg-red-100 border-red-300 text-red-900',
@@ -60,6 +67,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   return (
     <div
+      {...props}
       className={cn(
         "h-8 flex items-center justify-center cursor-pointer rounded transition-colors border-2",
         colorClasses[color],
@@ -73,4 +81,17 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-export { EditableCell };
+// Memo personalizado para evitar renders innecesarios
+function areEqual(prevProps: EditableCellProps, nextProps: EditableCellProps) {
+  // Solo re-render si cambia el valor, color o isEdited
+  return (
+    prevProps.value === nextProps.value &&
+    prevProps.color === nextProps.color &&
+    prevProps.isEdited === nextProps.isEdited &&
+    prevProps.onEdit === nextProps.onEdit // onEdit debe ser estable (useCallback)
+  );
+}
+
+const MemoizedEditableCell = React.memo(EditableCell, areEqual);
+
+export { MemoizedEditableCell as EditableCell };
