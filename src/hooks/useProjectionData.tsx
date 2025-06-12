@@ -1,4 +1,4 @@
-import { processInitialData, updateSingleCell } from '@/lib/color-calculator';
+import { processDataForTable } from '@/lib/color-calculator';
 import { CellId, ProductProjection } from '@/types/projection';
 import { useState, useMemo, useCallback } from 'react';
 
@@ -7,8 +7,8 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Map<CellId, number>>(new Map());
 
-  const { rows: processedTableData, cellDataMap } = useMemo(() => {
-    return processInitialData(data, editedValues);
+  const processedTableData = useMemo(() => {
+    return processDataForTable(data, editedValues);
   }, [data, editedValues]);
 
   const dates = useMemo(() => {
@@ -23,27 +23,17 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
     });
   }, []);
 
-  const updateCellDirect = useCallback((cellId: CellId, value: number) => {
-    setEditedValues(prev => {
-      const newMap = new Map(prev);
-      newMap.set(cellId, value);
-      return newMap;
-    });
-  }, [cellDataMap]);
-
   const selectColumn = useCallback((columnId: string) => {
     setSelectedColumn(columnId);
   }, []);
 
   return {
     data: processedTableData,
-    cellDataMap, // expón el mapa si lo necesitas en el grid
     selectedColumn,
     dates,
     actions: {
       editCell,
-      updateCellDirect, // expón la función optimizada si el grid la requiere
-      selectColumn,
+      selectColumn
     }
   };
 };

@@ -6,7 +6,7 @@ import {
   flexRender
 } from '@tanstack/react-table';
 import type { CellId, ProcessedTableRow } from '@/types/projection';
-import { EditableCell } from '@/components/ui/EditableCell';
+import { EditableCell } from '@/components/ui/editable-cell';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
