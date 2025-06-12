@@ -1,5 +1,3 @@
-// Tipos centrales para grid de proyección
-
 export interface ProductProjection {
   CenterCode: string;
   Reference: string;
@@ -11,7 +9,7 @@ export interface ProductProjection {
   MakeToOrder: number;
 }
 
-export type CellId = `${string}-${string}`; // Reference-Date
+export type CellId = `${string}-${string}`;
 export type CellColor = 'red' | 'yellow' | 'green' | 'black' | 'blue' | 'transparent';
 
 export interface CellData {
@@ -26,7 +24,10 @@ export interface CellData {
   isEdited: boolean;
 }
 
-// Solución: separar campos estáticos y dinámicos
 export interface ProcessedTableRow {
-  [key: string]: CellData | string;
-}
+  reference: string;
+  centerCode: string;
+  cells: {
+    [visibleForecastedDate: string]: CellData | any; // Add index signature
+  };
+};

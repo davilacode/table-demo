@@ -3,12 +3,9 @@ import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
-  type ColumnDef,
-  type Table,
   flexRender
 } from '@tanstack/react-table';
-import { calculateCellColor, processDataForTable } from '@/lib/color-calculator';
-import type { ProductProjection, CellId, CellColor, ProcessedTableRow, CellData } from '@/types/projection';
+import type { CellId, ProcessedTableRow } from '@/types/projection';
 import { EditableCell } from '@/components/ui/EditableCell';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -16,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 
 const columnHelper = createColumnHelper<ProcessedTableRow>();
 
-// Props para el grid: datos procesados, fechas, columna seleccionada, handlers
 interface ProjectionGridProps {
   data: ProcessedTableRow[];
   dates: string[];
@@ -30,9 +26,19 @@ export const useProjectionColumns = (
   onCellEdit: (cellId: CellId, value: number) => void,
   onColumnSelect: (columnId: string) => void,
   selectedColumn: string | null
-): ColumnDef<ProcessedTableRow>[] => {
+) => {
   return useMemo(() => {
-    const staticColumns: ColumnDef<ProcessedTableRow>[] = [
+    const staticColumns = [
+      columnHelper.accessor('centerCode' as keyof ProcessedTableRow, {
+        header: 'Centro',
+        cell: ({ getValue }) => {
+          const value = getValue();
+          return typeof value === 'string' ? (
+            <Badge variant="outline" className="text-xs">{value}</Badge>
+          ) : null;
+        },
+        size: 100,
+      }),
       columnHelper.accessor('reference' as keyof ProcessedTableRow, {
         header: 'Referencia',
         cell: ({ getValue }) => {
@@ -44,18 +50,8 @@ export const useProjectionColumns = (
         size: 180,
         enableSorting: true,
       }),
-      columnHelper.accessor('centerCode' as keyof ProcessedTableRow, {
-        header: 'Centro',
-        cell: ({ getValue }) => {
-          const value = getValue();
-          return typeof value === 'string' ? (
-            <Badge variant="outline" className="text-xs">{value}</Badge>
-          ) : null;
-        },
-        size: 100,
-      }),
     ];
-    const dynamicColumns: ColumnDef<ProcessedTableRow>[] = dates.map(date =>
+    const dynamicColumns = dates.map(date =>
       columnHelper.accessor(date as keyof ProcessedTableRow, {
         header: () => (
           <div
@@ -68,8 +64,8 @@ export const useProjectionColumns = (
             {format(new Date(date), 'dd/MM')}
           </div>
         ),
-        cell: ({ getValue, row, column }) => {
-          const cellData = getValue();
+        cell: ({ row }) => {
+          const cellData = row.original['cells']?.[date];
           const cellId: CellId = `${row.original['reference']}-${date}`;
           return cellData && typeof cellData === 'object' ? (
             <EditableCell

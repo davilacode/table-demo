@@ -1,7 +1,5 @@
-// Utilidades para grid de proyección
-import { ProductProjection, CellId, CellColor, ProcessedTableRow, CellData } from '@/types/projection';
+import { ProductProjection, CellData, CellId, CellColor, ProcessedTableRow } from '@/types/projection';
 
-// Lógica de coloreado según brief
 export function calculateCellColor(
   netFlow: number,
   makeToOrder: number,
@@ -9,31 +7,44 @@ export function calculateCellColor(
   yellowZone: number,
   greenZone: number
 ): CellColor {
+
   const total = netFlow + makeToOrder;
-  if (total === 0) return 'black';
   if (total >= 1 && total <= redZone) return 'red';
   if (total > redZone && total <= redZone + yellowZone) return 'yellow';
   if (total > redZone + yellowZone && total <= redZone + yellowZone + greenZone) return 'green';
+  if (total === 0) return 'black';
   if (total > redZone + yellowZone + greenZone) return 'blue';
   return 'transparent';
+
 }
 
-// Procesa los datos planos a filas por producto con columnas dinámicas por fecha
-// Ajustar processDataForTable para usar 'cells' en vez de claves dinámicas
 export function processDataForTable(
   data: ProductProjection[],
   editedValues: Map<CellId, number>
 ): ProcessedTableRow[] {
+
   const grouped: Record<string, ProcessedTableRow> = {};
+
   data.forEach(item => {
     const rowKey = `${item.Reference}-${item.CenterCode}`;
     if (!grouped[rowKey]) {
       grouped[rowKey] = {
         reference: item.Reference,
         centerCode: item.CenterCode,
-        cells: {},
+        cells: {
+          value: 0,
+          netFlow: 0,     
+          zones: {
+            red: 0,
+            yellow: 0,
+            green: 0,
+          },
+          color: 'transparent' as CellColor,
+          isEdited: false,
+        },
       };
     }
+    
     const cellId: CellId = `${item.Reference}-${item.VisibleForecastedDate}`;
     const value = editedValues.get(cellId) ?? item.MakeToOrder;
     const color = calculateCellColor(
