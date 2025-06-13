@@ -16,7 +16,7 @@ const App = () => {
   } = useProjectionData(sampleData.Datos as ProductProjection[]);
 
   return (
-    <div className="p-8">
+    <div className="p-2">
       <h1 className="text-2xl font-bold mb-4">Proyección de Productos</h1>
       <ProjectionGrid data={data} dates={dates} selectedColumn={selectedColumn} onCellEdit={actions.editCell} onColumnSelect={actions.selectColumn} />
 
