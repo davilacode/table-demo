@@ -9,6 +9,12 @@ import type { ProcessedTableRow } from '@/types/projection';
 import EditableCell from '@/components/ui/editable-cell';
 import { Badge } from '@/components/ui/badge';
 import HeaderCell from "@/components/ui/header-cell";
+import { cn } from "@/lib/utils";
+
+type ProjectionColumnMeta = {
+  isFixed?: boolean;
+  fixedLeft?: number;
+};
 
 const columnHelper = createColumnHelper<ProcessedTableRow>();
 
@@ -27,6 +33,10 @@ export const useProjectionColumns = (
   selectedColumn: string | null
 ) => {
   return useMemo(() => {
+
+    const centerCodeFixedLeft = 0;
+    const referenceFixedLeft = 100;
+
     const staticColumns = [
       columnHelper.accessor('centerCode' as keyof ProcessedTableRow, {
         header: 'Centro',
@@ -37,6 +47,10 @@ export const useProjectionColumns = (
           ) : null;
         },
         size: 100,
+        meta: {
+          isFixed: true,
+          fixedLeft: centerCodeFixedLeft,
+        }
       }),
       columnHelper.accessor('reference' as keyof ProcessedTableRow, {
         header: 'Referencia',
@@ -48,6 +62,10 @@ export const useProjectionColumns = (
         },
         size: 180,
         enableSorting: true,
+        meta: {
+          isFixed: true,
+          fixedLeft: referenceFixedLeft,
+        }
       }),
     ];
     const dynamicColumns = dates.map(date =>
@@ -98,37 +116,58 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates,
   });
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-auto h-[40vh] mb-5">
       <table className="min-w-full border-collapse">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th
-                  key={header.id}
-                  className="border px-2 py-1 bg-muted text-xs font-semibold text-left"
-                  style={{ minWidth: header.getSize() }}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </th>
-              ))}
+              {headerGroup.headers.map(header => {
+                const meta = header.column.columnDef.meta as ProjectionColumnMeta | undefined;
+                const isFixed = meta?.isFixed ?? false;
+                const fixedLeft = meta?.fixedLeft ?? 0;
+                return (
+                  <th
+                    key={header.id}
+                    className={cn(
+                      "border px-2 py-1 bg-muted text-xs font-semibold text-left sticky top-0",
+                      isFixed ? "sticky left-0 z-[100]" : ""
+                    )}
+                    style={{
+                      minWidth: header.getSize(),
+                      left: isFixed ? `${fixedLeft}px` : undefined,
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </th>
+                )})}
             </tr>
           ))}
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => (
             <tr key={row.id}>
-              {row.getVisibleCells().map(cell => (
-                <td
-                  key={cell.id}
-                  className="border px-2 py-1 text-sm"
-                  style={{ minWidth: cell.column.getSize() }}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+              {row.getVisibleCells().map(cell => {
+                const meta = cell.column.columnDef.meta as ProjectionColumnMeta | undefined;
+                const isFixed = meta?.isFixed ?? false;
+                const fixedLeft = meta?.fixedLeft ?? 0;
+
+                return (
+                  <td
+                    key={cell.id}
+                    className={cn(
+                      "border px-2 py-1 text-sm",
+                      isFixed ? "sticky left-0 z-10 bg-white" : "",
+                    )}
+                    style={{ 
+                      minWidth: cell.column.getSize(),
+                      left: isFixed ? `${fixedLeft}px` : undefined,
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+              )})}
             </tr>
           ))}
         </tbody>

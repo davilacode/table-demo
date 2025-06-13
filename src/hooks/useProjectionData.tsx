@@ -1,4 +1,5 @@
 import { calculateCellColor, processDataForTable } from '@/lib/color-calculator';
+import { calculateSummaryForColumn } from '@/lib/summary';
 import { ProcessedTableRow, ProductProjection } from '@/types/projection';
 import { useState, useMemo, useCallback } from 'react';
 
@@ -53,10 +54,17 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
     setSelectedColumn(columnId);
   }, []);
 
+  // Datos de resumen calculados
+  const summaryData = useMemo(() => {
+    if (!selectedColumn) return null;
+    return calculateSummaryForColumn(formatData, selectedColumn);
+  }, [formatData, selectedColumn]);
+
   return {
     data: formatData,
     selectedColumn,
     dates,
+    summaryData,
     actions: {
       editCell,
       selectColumn

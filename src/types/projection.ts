@@ -33,3 +33,22 @@ export interface ProcessedTableRow {
 }
 
 export type ProcessedTable = Record<string, ProcessedTableRow>;
+
+export type SummaryData = {
+  red: { count: number; percentage: number };
+  yellow: { count: number; percentage: number };
+  green: { count: number; percentage: number };
+  black: { count: number; percentage: number };
+  blue: { count: number; percentage: number };
+  total: number;
+  selectedDate: string | null;
+} | null;
+
+export interface ColorSummaryItem {
+  color: CellColor;
+  count: number;
+  percentage: number;
+  label: string;
+  bgColor: string;
+  textColor: string;
+}
