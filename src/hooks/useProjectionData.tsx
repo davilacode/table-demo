@@ -1,26 +1,52 @@
-import { processDataForTable } from '@/lib/color-calculator';
-import { CellId, ProductProjection } from '@/types/projection';
+import { calculateCellColor, processDataForTable } from '@/lib/color-calculator';
+import { ProcessedTableRow, ProductProjection } from '@/types/projection';
 import { useState, useMemo, useCallback } from 'react';
 
 export const useProjectionData = (initialData: ProductProjection[]) => {
-  const [data] = useState(initialData);
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
-  const [editedValues, setEditedValues] = useState<Map<CellId, number>>(new Map());
+  
+  const [formatData, setFormatData] = useState<ProcessedTableRow[]>(() =>
+    processDataForTable(initialData)
+  );
 
-  const processedTableData = useMemo(() => {
-    return processDataForTable(data, editedValues);
-  }, [data, editedValues]);
+ const dates = useMemo(() => {
+    return [...new Set(initialData.map(item => item.VisibleForecastedDate))].sort();
+  }, [initialData]);
 
-  const dates = useMemo(() => {
-    return [...new Set(data.map(item => item.VisibleForecastedDate))].sort();
-  }, [data]);
+  const editCell = useCallback((rowIndex: string, columnId: string, value: number) => {
 
-  const editCell = useCallback((cellId: CellId, value: number) => {
-    setEditedValues(prev => {
-      const newMap = new Map(prev);
-      newMap.set(cellId, value);
-      return newMap;
+    const [reference] = rowIndex.split('-');
+    
+    setFormatData(prevData => {
+      return prevData.map(row => {
+        if (row.reference === reference) {
+          const cell = row.cells[columnId];
+          if (cell) {
+            const newColor = calculateCellColor(
+              cell.netFlow,
+              value,
+              cell.zones.red,
+              cell.zones.yellow,
+              cell.zones.green
+            );
+            return {
+              ...row,
+              cells: {
+                ...row.cells,
+                [columnId]: {
+                  ...cell,
+                  value,
+                  color: newColor,
+                  isEdited: true
+                }
+              }
+            };
+          }
+        }
+        return row;
+      });
     });
+  
   }, []);
 
   const selectColumn = useCallback((columnId: string) => {
@@ -28,7 +54,7 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
   }, []);
 
   return {
-    data: processedTableData,
+    data: formatData,
     selectedColumn,
     dates,
     actions: {

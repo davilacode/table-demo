@@ -5,11 +5,10 @@ import {
   useReactTable,
   flexRender
 } from '@tanstack/react-table';
-import type { CellId, ProcessedTableRow } from '@/types/projection';
-import { EditableCell } from '@/components/ui/editable-cell';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import type { ProcessedTableRow } from '@/types/projection';
+import EditableCell from '@/components/ui/editable-cell';
 import { Badge } from '@/components/ui/badge';
+import HeaderCell from "@/components/ui/header-cell";
 
 const columnHelper = createColumnHelper<ProcessedTableRow>();
 
@@ -17,13 +16,13 @@ interface ProjectionGridProps {
   data: ProcessedTableRow[];
   dates: string[];
   selectedColumn: string | null;
-  onCellEdit: (cellId: CellId, value: number) => void;
+  onCellEdit: (ref: string, date: string, value: number) => void;
   onColumnSelect: (columnId: string) => void;
 }
 
 export const useProjectionColumns = (
   dates: string[],
-  onCellEdit: (cellId: CellId, value: number) => void,
+  onCellEdit: (ref: string, date: string, value: number) => void,
   onColumnSelect: (columnId: string) => void,
   selectedColumn: string | null
 ) => {
@@ -54,27 +53,24 @@ export const useProjectionColumns = (
     const dynamicColumns = dates.map(date =>
       columnHelper.accessor(date as keyof ProcessedTableRow, {
         header: () => (
-          <div
-            className={cn(
-              "text-center cursor-pointer transition-colors px-2 py-1 rounded",
-              selectedColumn === date ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-            )}
-            onClick={() => onColumnSelect(date)}
-          >
-            {format(new Date(date), 'dd/MM')}
-          </div>
+          <HeaderCell 
+            date={date}
+            selectedColumn={selectedColumn}
+            onColumnSelect={onColumnSelect}
+          />
         ),
         cell: ({ row }) => {
           const cellData = row.original['cells']?.[date];
-          const cellId: CellId = `${row.original['reference']}-${date}`;
-          return cellData && typeof cellData === 'object' ? (
+          return (
             <EditableCell
               value={cellData.value}
               color={cellData.color}
-              onEdit={(value: number) => onCellEdit(cellId, value)}
+              onEdit={onCellEdit}
+              reference={row.id}
+              visibleForecastedDate={date}
               isEdited={cellData.isEdited}
             />
-          ) : null;
+          )
         },
         size: 80,
         enableSorting: false,
@@ -84,7 +80,7 @@ export const useProjectionColumns = (
   }, [dates, onCellEdit, onColumnSelect, selectedColumn]);
 };
 
-const ProjectionGrid: React.FC<ProjectionGridProps> = ({ data, dates, selectedColumn, onCellEdit, onColumnSelect }) => {
+const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates, selectedColumn, onCellEdit, onColumnSelect }) => {
 
   const columns = useProjectionColumns(
     dates,
@@ -98,6 +94,7 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = ({ data, dates, selectedCo
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: false,
+    getRowId: (row) => `${row.reference}-${row.centerCode}`
   });
 
   return (
@@ -138,6 +135,6 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = ({ data, dates, selectedCo
       </table>
     </div>
   );
-};
+});
 
 export { ProjectionGrid };

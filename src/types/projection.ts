@@ -28,6 +28,8 @@ export interface ProcessedTableRow {
   reference: string;
   centerCode: string;
   cells: {
-    [visibleForecastedDate: string]: CellData | any; // Add index signature
+    [visibleForecastedDate: string]: CellData;
   };
-};
+}
+
+export type ProcessedTable = Record<string, ProcessedTableRow>;

@@ -1,4 +1,4 @@
-import { ProductProjection, CellData, CellId, CellColor, ProcessedTableRow } from '@/types/projection';
+import { ProductProjection, CellColor, ProcessedTableRow } from '@/types/projection';
 
 export function calculateCellColor(
   netFlow: number,
@@ -9,18 +9,19 @@ export function calculateCellColor(
 ): CellColor {
 
   const total = netFlow + makeToOrder;
+
   if (total >= 1 && total <= redZone) return 'red';
   if (total > redZone && total <= redZone + yellowZone) return 'yellow';
   if (total > redZone + yellowZone && total <= redZone + yellowZone + greenZone) return 'green';
-  if (total === 0) return 'black';
   if (total > redZone + yellowZone + greenZone) return 'blue';
+  if (total === 0) return 'black';
+  
   return 'transparent';
 
 }
 
 export function processDataForTable(
   data: ProductProjection[],
-  editedValues: Map<CellId, number>
 ): ProcessedTableRow[] {
 
   const grouped: Record<string, ProcessedTableRow> = {};
@@ -31,22 +32,11 @@ export function processDataForTable(
       grouped[rowKey] = {
         reference: item.Reference,
         centerCode: item.CenterCode,
-        cells: {
-          value: 0,
-          netFlow: 0,     
-          zones: {
-            red: 0,
-            yellow: 0,
-            green: 0,
-          },
-          color: 'transparent' as CellColor,
-          isEdited: false,
-        },
+        cells: {},
       };
     }
     
-    const cellId: CellId = `${item.Reference}-${item.VisibleForecastedDate}`;
-    const value = editedValues.get(cellId) ?? item.MakeToOrder;
+    const value = item.MakeToOrder;
     const color = calculateCellColor(
       item.NetFlow,
       value,
@@ -63,8 +53,11 @@ export function processDataForTable(
         green: item.GreenZone,
       },
       color,
-      isEdited: editedValues.has(cellId),
+      isEdited: false,
     };
   });
+
+  console.log('Processed Data:', Object.values(grouped));
+
   return Object.values(grouped);
 }

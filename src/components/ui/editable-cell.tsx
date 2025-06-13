@@ -1,12 +1,14 @@
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { CellColor } from '@/types/projection';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 
 interface EditableCellProps {
   value: number;
   color: CellColor;
-  onEdit: (value: number) => void;
+  onEdit: (reference: string, visibleForecastedDate: string, value: number) => void;
+  reference: string;
+  visibleForecastedDate: string;
   isEdited: boolean;
 }
 
@@ -14,14 +16,14 @@ const EditableCell: React.FC<EditableCellProps> = ({
   value,
   color,
   onEdit,
+  reference,
+  visibleForecastedDate,
   isEdited,
-  ...props
 }) => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value.toString());
 
-  // Sincroniza tempValue con value externo
   useEffect(() => {
     setTempValue(value.toString());
   }, [value]);
@@ -35,13 +37,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
     transparent: 'bg-background'
   };
 
-  const handleSubmit = () => {
-    const numValue = Number(tempValue);
-    if (!isNaN(numValue)) {
-      onEdit(numValue);
+  const handleSubmit = useCallback(() => {
+    const numericValue = parseFloat(tempValue.toString());
+    if (!isNaN(numericValue) && numericValue !== value) {
+      onEdit(reference, visibleForecastedDate, numericValue);
     }
     setIsEditing(false);
-  };
+  }, [tempValue, reference, visibleForecastedDate, onEdit]);
 
   if (isEditing) {
     return (
@@ -67,7 +69,6 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   return (
     <div
-      {...props}
       className={cn(
         "h-8 flex items-center justify-center cursor-pointer rounded transition-colors border-2",
         colorClasses[color],
@@ -81,17 +82,4 @@ const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
-// Memo personalizado para evitar renders innecesarios
-function areEqual(prevProps: EditableCellProps, nextProps: EditableCellProps) {
-  // Solo re-render si cambia el valor, color o isEdited
-  return (
-    prevProps.value === nextProps.value &&
-    prevProps.color === nextProps.color &&
-    prevProps.isEdited === nextProps.isEdited &&
-    prevProps.onEdit === nextProps.onEdit // onEdit debe ser estable (useCallback)
-  );
-}
-
-const MemoizedEditableCell = React.memo(EditableCell, areEqual);
-
-export { MemoizedEditableCell as EditableCell };
+export default memo(EditableCell);
