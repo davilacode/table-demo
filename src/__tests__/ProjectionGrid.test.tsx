@@ -1,8 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ProjectionGrid } from '@/components/projection/ProjectionGrid';
+import ProjectionGrid from '@/components/projection/ProjectionGrid';
 import { mockProjectionData } from '@/test-utils/mock-data';
-import { processDataForTable } from '@/lib/color-calculator';
+import { processDataForTable } from '@/lib/utils';
 
 describe('ProjectionGrid', () => {
 
