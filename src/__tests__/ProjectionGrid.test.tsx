@@ -6,7 +6,7 @@ import { processDataForTable } from '@/lib/color-calculator';
 
 describe('ProjectionGrid', () => {
 
-  const processedData = processDataForTable(mockProjectionData, new Map());
+  const processedData = processDataForTable(mockProjectionData);
 
   const defaultProps = {
     data: processedData,
@@ -26,8 +26,6 @@ describe('ProjectionGrid', () => {
   test('debe calcular colores correctamente según reglas de negocio', () => {
     render(<ProjectionGrid {...defaultProps} />);
     
-    // Caso: NetFlow=100, MakeToOrder=23, RedZone=50, YellowZone=55, GreenZone=55
-    // Total=123, debe ser verde (> RedZone + YellowZone = 105)
     const cell = screen.getByTestId('cell-210001000004R20-2025-03-21T00:00:00');
     expect(cell).toHaveClass('bg-blue-100');
   });
@@ -48,7 +46,6 @@ describe('ProjectionGrid', () => {
     
     expect(onCellEdit).toHaveBeenCalledWith('210001000004R20-2025-03-21T00:00:00', 50);
     
-    // Verificar que solo se afectó la celda editada
     const nextCell = screen.getByTestId('cell-210001000004R20-2025-03-22T00:00:00');
     expect(nextCell).not.toHaveClass('bg-red-100'); // No debe cambiar
   });

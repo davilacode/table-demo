@@ -1,22 +1,17 @@
 import React, { useMemo } from "react";
 import {
-  createColumnHelper,
   getCoreRowModel,
   useReactTable,
   flexRender
 } from '@tanstack/react-table';
 import type { ProcessedTableRow } from '@/types/projection';
-import EditableCell from '@/components/ui/editable-cell';
-import { Badge } from '@/components/ui/badge';
-import HeaderCell from "@/components/ui/header-cell";
 import { cn } from "@/lib/utils";
+import { useProjectionColumns } from "@/hooks/useProjectionColumns";
 
 type ProjectionColumnMeta = {
   isFixed?: boolean;
   fixedLeft?: number;
 };
-
-const columnHelper = createColumnHelper<ProcessedTableRow>();
 
 interface ProjectionGridProps {
   data: ProcessedTableRow[];
@@ -25,78 +20,6 @@ interface ProjectionGridProps {
   onCellEdit: (ref: string, date: string, value: number) => void;
   onColumnSelect: (columnId: string) => void;
 }
-
-export const useProjectionColumns = (
-  dates: string[],
-  onCellEdit: (ref: string, date: string, value: number) => void,
-  onColumnSelect: (columnId: string) => void,
-  selectedColumn: string | null
-) => {
-  return useMemo(() => {
-
-    const centerCodeFixedLeft = 0;
-    const referenceFixedLeft = 100;
-
-    const staticColumns = [
-      columnHelper.accessor('centerCode' as keyof ProcessedTableRow, {
-        header: 'Centro',
-        cell: ({ getValue }) => {
-          const value = getValue();
-          return typeof value === 'string' ? (
-            <Badge variant="outline" className="text-xs">{value}</Badge>
-          ) : null;
-        },
-        size: 100,
-        meta: {
-          isFixed: true,
-          fixedLeft: centerCodeFixedLeft,
-        }
-      }),
-      columnHelper.accessor('reference' as keyof ProcessedTableRow, {
-        header: 'Referencia',
-        cell: ({ getValue }) => {
-          const value = getValue();
-          return typeof value === 'string' ? (
-            <div className="font-medium text-sm">{value}</div>
-          ) : null;
-        },
-        size: 180,
-        enableSorting: true,
-        meta: {
-          isFixed: true,
-          fixedLeft: referenceFixedLeft,
-        }
-      }),
-    ];
-    const dynamicColumns = dates.map(date =>
-      columnHelper.accessor(date as keyof ProcessedTableRow, {
-        header: () => (
-          <HeaderCell 
-            date={date}
-            selectedColumn={selectedColumn}
-            onColumnSelect={onColumnSelect}
-          />
-        ),
-        cell: ({ row }) => {
-          const cellData = row.original['cells']?.[date];
-          return (
-            <EditableCell
-              value={cellData.value}
-              color={cellData.color}
-              onEdit={onCellEdit}
-              reference={row.id}
-              visibleForecastedDate={date}
-              isEdited={cellData.isEdited}
-            />
-          )
-        },
-        size: 80,
-        enableSorting: false,
-      })
-    );
-    return [...staticColumns, ...dynamicColumns];
-  }, [dates, onCellEdit, onColumnSelect, selectedColumn]);
-};
 
 const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates, selectedColumn, onCellEdit, onColumnSelect }) => {
 
@@ -176,4 +99,4 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates,
   );
 });
 
-export { ProjectionGrid };
+export default ProjectionGrid;

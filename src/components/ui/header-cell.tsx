@@ -1,12 +1,6 @@
 import { cn } from '@/lib/utils';
-import { Column } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { memo } from 'react';
-
-interface HeaderCellMeta {
-  onColumnSelect: (date: string) => void;
-  selectedColumn: string;
-}
 
 interface HeaderCellProps {
   date: string;

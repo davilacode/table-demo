@@ -1,19 +1,22 @@
-import { calculateCellColor, processDataForTable } from '@/lib/color-calculator';
-import { calculateSummaryForColumn } from '@/lib/summary';
+import { calculateCellColor, processDataForTable } from '@/lib/utils';
+import { calculateSummaryForColumn } from '@/lib/utils';
 import { ProcessedTableRow, ProductProjection } from '@/types/projection';
 import { useState, useMemo, useCallback } from 'react';
 
 export const useProjectionData = (initialData: ProductProjection[]) => {
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   
+  // Procesar los datos iniciales para la tabla
   const [formatData, setFormatData] = useState<ProcessedTableRow[]>(() =>
     processDataForTable(initialData)
   );
 
+  // Extraer las fechas únicas y ordenarlas
  const dates = useMemo(() => {
     return [...new Set(initialData.map(item => item.VisibleForecastedDate))].sort();
   }, [initialData]);
 
+  // Función para editar una celda
   const editCell = useCallback((rowIndex: string, columnId: string, value: number) => {
 
     const [reference] = rowIndex.split('-');

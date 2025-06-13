@@ -1,9 +1,9 @@
 import './App.css'
-import { ProjectionGrid } from '@/components/projection/ProjectionGrid'
 import sampleData from '@/data/sample-data.json'
-import { ProductProjection } from './types/projection';
-import { useProjectionData } from './hooks/useProjectionData';
-import Summary from './components/projection/Summary';
+import { ProductProjection } from '@/types/projection';
+import { useProjectionData } from '@/hooks/useProjectionData';
+import Summary from '@/components/projection/Summary';
+import ProjectionGrid from '@/components/projection/ProjectionGrid'
 
 const App = () => {
 
@@ -14,8 +14,6 @@ const App = () => {
     summaryData,
     actions
   } = useProjectionData(sampleData.Datos as ProductProjection[]);
-
-  console.log('summaryData:', summaryData);
 
   return (
     <div className="p-8">
