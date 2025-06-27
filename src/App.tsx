@@ -2,8 +2,7 @@ import './App.css'
 import sampleData from '@/data/sample-data.json'
 import { ProductProjection } from '@/types/projection';
 import { useProjectionData } from '@/hooks/useProjectionData';
-import Summary from '@/components/projection/Summary';
-import ProjectionGrid from '@/components/projection/ProjectionGrid'
+import { ProjectionGrid, Summary } from '@/components/projection'
 
 const App = () => {
 
@@ -27,7 +26,6 @@ const App = () => {
           className="sticky top-6"
         />
       </div>
-      
     </div>
   )
 }

@@ -15,7 +15,7 @@ export function calculateCellColor(
   greenZone: number
 ): CellColor {
 
-  const total = netFlow + makeToOrder;
+  const total = netFlow;
 
   if (total >= 1 && total <= redZone) return 'red';
   if (total > redZone && total <= redZone + yellowZone) return 'yellow';
