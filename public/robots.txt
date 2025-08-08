@@ -1,0 +1,5 @@
+# Allow all crawling, and point to sitemap if added later
+User-agent: *
+Allow: /
+
+# Sitemap: /sitemap.xml

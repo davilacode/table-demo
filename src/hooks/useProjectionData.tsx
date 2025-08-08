@@ -39,8 +39,6 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
             const currentCell = row.cells[key];
           
             if (key === columnId) {
-              console.log("celda",cell);
-
               const newColor = calculateCellColor(
                 newNetFlow,
                 value,
@@ -56,8 +54,6 @@ export const useProjectionData = (initialData: ProductProjection[]) => {
                 color: newColor,
                 isEdited: true
               };
-
-              console.log("newCells",newCells[columnId]);
             }else if(i > editedIndex){
 
               const newColor = calculateCellColor(

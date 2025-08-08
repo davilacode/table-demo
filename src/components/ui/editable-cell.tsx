@@ -49,7 +49,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
 
   if (isEditing) {
     return (
-      <Input
+    <Input
         value={tempValue}
         onChange={(e) => setTempValue(e.target.value)}
         onBlur={handleSubmit}
@@ -67,6 +67,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         autoFocus
   inputMode="numeric"
   aria-label="cell-editor"
+  aria-description={`Editar valor ${value} para la fecha ${visibleForecastedDate} y referencia ${reference}`}
       />
     );
   }
@@ -80,6 +81,15 @@ const EditableCell: React.FC<EditableCellProps> = ({
         isEdited && "ring-2 ring-blue-500 ring-opacity-50"
       )}
       onClick={() => setIsEditing(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setIsEditing(true);
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Celda editable, valor ${value}, fecha ${visibleForecastedDate}, referencia ${reference}. Presiona Enter para editar.`}
   data-testid={dataTestId}
     >
       <span className="text-sm font-medium">{value}</span>
