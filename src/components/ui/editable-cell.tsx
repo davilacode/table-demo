@@ -10,6 +10,7 @@ interface EditableCellProps {
   reference: string;
   visibleForecastedDate: string;
   isEdited: boolean;
+  dataTestId?: string;
 }
 
 const EditableCell: React.FC<EditableCellProps> = ({
@@ -19,6 +20,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
   reference,
   visibleForecastedDate,
   isEdited,
+  dataTestId,
 }) => {
   
   const [isEditing, setIsEditing] = useState(false);
@@ -58,11 +60,13 @@ const EditableCell: React.FC<EditableCellProps> = ({
             setIsEditing(false);
           }
         }}
-        className={cn(
+  className={cn(
           "h-8 text-center border-2",
           colorClasses[color]
         )}
         autoFocus
+  inputMode="numeric"
+  aria-label="cell-editor"
       />
     );
   }
@@ -76,6 +80,7 @@ const EditableCell: React.FC<EditableCellProps> = ({
         isEdited && "ring-2 ring-blue-500 ring-opacity-50"
       )}
       onClick={() => setIsEditing(true)}
+  data-testid={dataTestId}
     >
       <span className="text-sm font-medium">{value}</span>
     </div>

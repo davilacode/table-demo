@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -16,19 +16,14 @@ type ProjectionColumnMeta = {
 interface ProjectionGridProps {
   data: ProcessedTableRow[];
   dates: string[];
-  selectedColumn: string | null;
   onCellEdit: (ref: string, date: string, value: number) => void;
-  onColumnSelect: (columnId: string) => void;
+  selectedColumn?: string | null; // kept optional for compatibility
+  onColumnSelect?: (columnId: string) => void; // header selection disabled in this version
 }
 
-const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates, selectedColumn, onCellEdit, onColumnSelect }) => {
+const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates, onCellEdit, onColumnSelect, selectedColumn }) => {
 
-  const columns = useProjectionColumns(
-    dates,
-    onCellEdit,
-    onColumnSelect,
-    selectedColumn
-  );
+  const columns = useProjectionColumns(dates, onCellEdit);
 
   const table = useReactTable({
     data,
@@ -39,8 +34,8 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates,
   });
 
   return (
-    <div className="overflow-auto h-[40vh] mb-5">
-      <table className="min-w-full border-collapse">
+    <div className="overflow-auto h-[40vh] mb-5 scroll-smooth">
+      <table className="min-w-full border-separate border-spacing-0">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
@@ -48,17 +43,21 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates,
                 const meta = header.column.columnDef.meta as ProjectionColumnMeta | undefined;
                 const isFixed = meta?.isFixed ?? false;
                 const fixedLeft = meta?.fixedLeft ?? 0;
+                const headerIsDate = !meta?.isFixed && typeof header.column.id === 'string' && header.column.id.includes('T');
+                const isSelected = headerIsDate && typeof selectedColumn === 'string' && selectedColumn === header.column.id;
                 return (
                   <th
                     key={header.id}
                     className={cn(
-                      "border px-2 py-1 bg-muted text-xs font-semibold text-left sticky top-0",
-                      isFixed ? "sticky left-0 z-[100]" : ""
+                      "border-b border-r first:border-l border-t px-2 py-1 text-xs font-semibold text-left sticky top-0 z-20 shadow-sm",
+                      isFixed ? "sticky left-0 z-[100] bg-muted" : "",
+                      headerIsDate ? (isSelected ? "bg-primary text-primary-foreground" : "bg-muted hover:bg-muted/80 cursor-pointer") : "bg-muted"
                     )}
                     style={{
                       minWidth: header.getSize(),
                       left: isFixed ? `${fixedLeft}px` : undefined,
                     }}
+                    onClick={headerIsDate && typeof onColumnSelect === 'function' ? () => onColumnSelect!(header.column.id) : undefined}
                   >
                     {header.isPlaceholder
                       ? null
@@ -80,8 +79,8 @@ const ProjectionGrid: React.FC<ProjectionGridProps> = React.memo(({ data, dates,
                   <td
                     key={cell.id}
                     className={cn(
-                      "border px-2 py-1 text-sm",
-                      isFixed ? "sticky left-0 z-10 bg-white" : "",
+                      "border-b border-r first:border-l px-2 py-1 text-sm",
+                      isFixed ? "sticky left-0 z-10 bg-background" : "",
                     )}
                     style={{ 
                       minWidth: cell.column.getSize(),
